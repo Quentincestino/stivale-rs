@@ -1,23 +1,23 @@
 //! stivale2 header module for letting a stivale2 compliant bootloader find the kernel
-//! 
+//!
 //! Contains a stivale2 header struct and various tags allowed by stivale2
-//! 
+//!
 //! # Examples
-//! 
+//!
 //! Basic header
 //! ```ignore
 //! static STACK: [u8; 4096] = [0; 4096];
-//! 
+//!
 //! #[link_section = ".stivale2hdr"]
 //! #[used]
 //! static STIVALE_HDR: StivaleHeader = StivaleHeader::new(STACK[0] as *const u8);
 //! ```
-//! 
+//!
 //! Header with a framebuffer tag
 //! ```ignore
 //! static STACK: [u8; 4096] = [0; 4096];
 //! static FRAMEBUFFER_TAG: HeaderFramebufferTag = HeaderFramebufferTag::new().bpp(24);
-//! 
+//!
 //! #[link_section = ".stivale2hdr"]
 //! #[used]
 //! static STIVALE_HDR: StivaleHeader = StivaleHeader::new(STACK[0] as *const u8).tags((&FRAMEBUFFER_TAG as *const HeaderFramebufferTag).cast());
@@ -43,7 +43,7 @@ union StivaleHeaderEntryPoint {
 }
 
 /// A stivale2 header for the bootloader
-/// 
+///
 /// It must be defined in a static, and it must have the parameters `#[link_section = ".stivale2hdr"]`
 /// and `#[used]` so it isn't optimized away and a stivale2 compliant bootloader can find it
 #[repr(packed)]
@@ -70,8 +70,13 @@ impl StivaleHeader {
     }
 
     /// Set the entry point that a stivale2 compliant bootloader will call
-    pub const fn entry_point(mut self, entry_point: extern "C" fn(stivale_struct_addr: usize) -> !) -> Self {
-        self.entry_point = StivaleHeaderEntryPoint { function: entry_point };
+    pub fn entry_point(
+        mut self,
+        entry_point: extern "C" fn(stivale_struct_addr: usize) -> !,
+    ) -> Self {
+        self.entry_point = StivaleHeaderEntryPoint {
+            function: entry_point,
+        };
         self
     }
 
